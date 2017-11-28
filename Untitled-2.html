@@ -6,89 +6,53 @@
 <style type=text/css>
 * {margin:0;
 	padding:0;}
-#big {
-		border:1px red solid;
-		width:1300px;
-		height:600px;
-		}
-#first {
-		border:1px green solid;
-		width:1200px;
-		height:25px;
-		background:#B7B9CA;
-		padding-left:20px;
-		line-height:25px;
-	
-		}
-#first a {
-		font-family:"微软雅黑";
-		playstyle:inline-block;
-		padding-right:15px;
-		padding-left:15px;
-		font-color:white;
-		text-decoration:none;
-		}
-#first a:hover {color:#FF0033}
-#second {
-		border:1px yellow solid;
-		width:300px;
-		height:270px;
-		float:left;
-		}
-#third p a {
-		playstyle:inline-block;
-		padding-right:15px;
-		padding-left:15px;
-		text-decoration:none;
-		}
-#third p a:hover {color:#FF0033}
-#second img {
-		width:164px;
-		height:90px;
-		}	
-#third {
-		border:1px green solid;
-		width:990px;
-		height:40px;
-		float:right;
-		margin-top:10px;
-		line-height:40px;
-		background:white;
-		}
-#for {
-		border:1px yellow solid;
-		width:990px;
-		height:500px;
-		float:right;
-		}
+<!--#big {order:1px red solid;width:1300px;height:600px;}-->
 
-#fif {
-		border:1px green solid;
-		width:300px;
-		height:300px;
-		float:left;
-		}
+#first {border:1px green solid;width:100%;height:25px;background:#5F5F5F;}
+.yemei1 {margin:0 15px;line-height:25px;}
+.yemei2 {margin:0 15px;line-height:25px;}
+#first a {font-family:"微软雅黑";playstyle:inline-block;padding-right:15px;padding-left:15px;color:white;text-decoration:none;}
+#first a:hover {color:#FF0033}
+
+#second {border:1px yellow solid;width:450px;height:270px;	float:left;font-color:yellow;}
+#one {font-size:36px;}
+.two {font-size:36px;color:#F87C47;}
+#third p a {playstyle:inline-block;padding-right:15px;padding-left:15px;text-decoration:none;}
+
+#third  a:hover {color:yellow;}
+
+#second img {width:164px;height:100px;}	
+
+#third {width:800px;	height:40px;	float:right;	margin-top:40px;margin-right:100px;line-height:40px;background-color:#C0C0C0;}
+
+#for {border:1px yellow solid;width:990px;height:500px;float:right;	}
+
+#fif {	border:1px green solid;	width:300px;	height:300px;float:left;}
 </style>
 </head>
 
-<body<!-- style="background:url(photo/0766.jpg_wh860.png);background-size:100% 100%;"-->>
-<div id="big"><!--大盒子-->
-<nav><ul id="first">
-<!--<div id="first"><!--页眉-->
-            <a href="#">联系我们</a><span>|</span>
-            <a href="#">网站地图</a><span>|</span>
-            <a href="#">业务链接</a><span>|</span>
-            <a href="#">法律声明</a><span>|</span>
-            <a href="#">给我们留言</a>
-					
-<!--</div>--></ul>
+<body /*style="background:url(photo/0766.jpg_wh860.png);background-size:100% 100%;"*/>
+<nav>
+		<ul id="first">
+            <a href="#" class="yemei1">联系我们</a><span>|</span>
+            <a href="#" class="yemei1">网站地图</a><span>|</span>
+            <a href="#" class="yemei1">业务链接</a><span>|</span>
+            <a href="#" class="yemei1">法律声明</a><span>|</span>
+            <a href="#" class="yemei1">给我们留言</a>
+			<a href="#" class="yemei1"></a>
+			<a href="#" class="yemei1"></a>
+			<a href="#" class="yemei1"></a>
+			<a href="#" class="yemei2">微信公众号</a><span>|</span>
+            <a href="#" class="yemei2">ENGLISH</a>
+		</ul>
 </nav>
 
-<div id="second"><!--logo--><p align="center"><img src="photo/logo.jpg" /></p>
-	<p align="center">走进卓望</p>
-	<p align="center">compony</p>
-	<p align="center">profile</p>
-</div>
+<nav id="second">
+	<p align="center"><img src="photo/logo.jpg" /></p>
+	<p align="center" id="one">走进卓望</p>
+	<p align="center" class="two">compony</p>
+	<p align="center" class="two">profile</p>
+</nav>
 
 <div id="third"><!--超链接-->
 		<p align="right"><a href="#">首页</a><span>|</span>
@@ -100,12 +64,10 @@
 		<a href="#" >加入卓望</a></p>
 </div>
 
-<div id="for"><!--4正文-->
-</div>
+<!--/*<div id="for">
+</div>*/
 
-<div id="fif"><!--索引-->
-</div>
-
-</div>
+/*<div id="fif">
+</div>*/-->
 </body>
 </html>
