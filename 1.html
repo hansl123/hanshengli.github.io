@@ -1,13 +1,17 @@
-<!DOCTYPE html>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-<style type=text/css>
-body {background-image:url(帅才/IMG_0218.JPG)}
-</style>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>一个简单的JSP页面——显示系统时间</title>
 </head>
 <body>
-<p style=font-size:12px;color:red;> you are wellcome! </p>
+<%
+	Date date = new Date();
+	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	String today = df.format(date);
+%>
+当前时间：<%=today%>
 </body>
 </html>
