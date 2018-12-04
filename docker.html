@@ -10,176 +10,172 @@
 </head>
 
 <body>
-    Docker基础知识
-1. Docker基础知识点
-1.1 什么是Docker
-    Docker是一个开源的引擎，可以轻松的为任何应用创建一个轻量级的、可移植的、自给自足的容器。（集装箱原理）
-1.2 什么是LXC
-    Linux Container容器是一种内核虚拟化技术，可以提供轻量级的虚拟化，以便隔离进程和资源
-    Docker核心解决的问题是利用LXC来实现类似VM的功能，从而利用更加节省的硬件资源提供给用户更多的计算资源。
-2. Docker架构
-    Docker 使用客户端-服务器 (C/S) 架构模式，使用远程API来管理和创建Docker容器。
-    Docker 容器通过 Docker 镜像来创建。
-    容器与镜像的关系类似于面向对象编程中的对象与类。
-docker	面向对象
-容器	对象
-镜像	类
-
-注：
-简单的说类是对象的模版。
-首先我们可以来理解一下对象的概念，面向对象编程的程序实际就是多个对象的集合，我们可以把所有的事物都抽象成对象，在程序设计中可以看作：对象=属性+方法。属性就是对象的数据，而方法就是对象的行为。下面来说类，就像我开头所说类是对象的模版，而对象是类的实例化。举个例子，饼干模子可以看作是类，而具体的饼干就是对象。再比如有一个类是表示人，然后可以通过人这个模版来实例化出张三、李四。
-3. Docker名词解释
-Docker 镜像(Images)	Docker 镜像是用于创建 Docker 容器的模板。
-Docker 容器(Container)	容器是独立运行的一个或一组应用。
-Docker架构中服务交付的最终体现形式
-Docker 客户端(Client)	Docker 客户端通过命令行或者其他工具使用 Docker API 与 Docker 的守护进程通信。
-Docker Daemon	Docker Daemon是Docker架构中一个常驻在后台的系统进程，接受并处理Docker Client发送的请求。
-Docker Server
-	Docker Server在Docker架构中是专门服务于Docker Client的server，接受并调度分发Docker Client发送的请求。
-Engine
-	Engine是Docker架构中的运行引擎，同时也Docker运行的核心模块。它扮演Docker container存储仓库的角色，并且通过执行job的方式来操纵管理这些容器。
-Job	一个Job可以认为是Docker架构中Engine内部最基本的工作执行单元。Docker可以做的每一项工作，都可以抽象为一个job。
-Docker 仓库(Registry)	Docker 仓库用来保存镜像，可以理解为代码控制中的代码仓库。而容器镜像是在容器被创建时，被加载用来初始化容器的文件架构与目录。
-Graph
-	Graph在Docker架构中扮演已下载容器镜像的保管者，以及已下载容器镜像之间关系的记录者。
-Driver
-	Driver是Docker架构中的驱动模块
-graphdriver	主要用于完成容器镜像的管理，包括存储与获取。
-networkdriver	完成Docker容器网络环境的配置
-execdriver	Docker容器的执行驱动，负责创建容器运行命名空间，负责容器资源使用的统计与限制，负责容器内部进程的真正运行等。
-libcontainer
-	Docker架构中一个使用Go语言设计实现的库，设计初衷是希望该库可以不依靠任何依赖，直接访问内核中与容器相关的API。容器管理的包
-Docker 主机(Host)	一个物理或者虚拟的机器用于执行 Docker 守护进程和容器。
-	
-
-4. Docker命令
-4.1 环境信息相关
-docker info  //docker系统信息
- 
-docker version  //docker版本信息
- 
-
-4.2 系统运维相关
-docker ps
-列出容器
-docker ps [OPTIONS]
--a :显示所有的容器，包括未运行的。
--f :根据条件过滤显示的内容。
--l :显示最近创建的容器。
--n :列出最近创建的n个容器。
--q :静默模式，只显示容器编号。 
-docker start/stop/restart
-docker start :启动一个或多少已经被停止的容器
-docker stop :停止一个运行中的容器
-docker restart :重启容器
- 
-docker pause/unpause
-docker pause :暂停容器中所有的进程。
-docker unpause :恢复容器中所有的进程
-docker pause [OPTIONS] CONTAINER [CONTAINER...]
-docker unpause [OPTIONS] CONTAINER [CONTAINER...]
-暂停webapp服务
-docker pause webapp
-恢复webapp服务
-docker unpause webapp
-docker kill
-杀掉一个运行中的容器
-docker kill [OPTIONS] CONTAINER [CONTAINER...]
- 
-docker exec 
-在运行的容器中执行命令
-docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
-ocker exec -it ContainerID/ContainaerName
-在容器中开启一个交互模式的终端
--i :即使没有附加也保持STDIN 打开
--t :分配一个伪终端
- 
-（有时候会在容器外执行下脚本对比在容器内执行脚本，看输出是否一致）
-docker inspect
- 获取容器/镜像的元数据
-docker inspect ContainerID/ContainaerName
- 
--f :指定返回值的模板文件
-（多用于获取制定的参数）
- 
-（通过docker inspect | grep 关键字，也能搜索到，但是没有 -f 指定搜索方便，尤其是当你脚本中要获取某个参数值时）
-docker top
-查看容器中运行的进程信息
-docker top [OPTIONS] CONTAINER [ps OPTIONS]
- 
-docker cp
-用于容器与主机之间的数据拷贝
-docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-
-docker cp [OPTIONS] SRC_PATH|- CONTAINER:DEST_PATH
-docker exec -it <container_id> bash -c 'cat > /path/to/container/file' < /path/to/host/file/
- 
-
-docker logs 
-获取容器的日志
--t : 显示时间戳
---tail :仅列出最新N条容器日志
-docker logs -t --tail=10 webapp
- 
-（有时候产品开发让看下logs，大家都说日志太多了，就可以使用--tail 来获取最新的一部分日志，为了好区分时间，前面可以加上 -t 显示时间）
-
-
-docker search
-从Docker Hub查找镜像
-docker search [OPTIONS] TERM
-
-docker pull
-从镜像仓库中拉取或者更新指定镜像
-docker pull [OPTIONS] NAME[:TAG|@DIGEST]
-从Docker Hub下载java最新版镜像
-docker pull java
-docker push 
-将本地的镜像上传到镜像仓库,要先登陆到镜像仓库
-docker push [OPTIONS] NAME[:TAG]
-docker push webapp:v1
-docker images
-列出本地镜像
-docker images [OPTIONS] [REPOSITORY[:TAG]]
--a :列出本地所有的镜像（含中间映像层，默认情况下，过滤掉中间映像层）；
--f :显示满足条件的镜像；
--q :只显示镜像ID。
-docker run
-创建一个新的容器并运行一个命令
-docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
-使用镜像centos:7以交互模式启动一个容器,在容器内执行/bin/bash命令
-docker run -it centos:7 /bin/bash
-docker create
-创建一个新的容器但不启动它
-docker create [OPTIONS] IMAGE [COMMAND] [ARG...]
-使用docker镜像centos:7创建一个容器,并将容器命名为odps
-docker create  --name odps  centos:7
-docker rm
-删除一个或多少容器
-docker rm [OPTIONS] CONTAINER [CONTAINER...]
-docker rm -f webapp
-docker export
-将文件系统作为一个tar归档文件导出到STDOUT
-docker export [OPTIONS] CONTAINER
-将id为a404c6c174a2的容器保存为tar文件
-docker export -o mysql.tar a404c6c174a2
-docker save
-将指定镜像保存成 tar 归档文件
-docker save [OPTIONS] IMAGE [IMAGE...]
-将镜像127.0.0.1:5000/java 生成java_v1.tar文档
-docker save -o java_v1.tar 127.0.0.1:5000/java
-docker import 
-从归档文件中创建镜像
-docker import [OPTIONS] file|URL|- [REPOSITORY[:TAG]]
-从镜像归档文件mysql.tar创建镜像，命名为127.0.0.1:5000/mysql:v1
- docker import  mysql.tar 127.0.0.1:5000/mysql:v1
-docker tag 
-标记本地镜像，将其归入某一仓库
-docker tag [OPTIONS] IMAGE[:TAG] [REGISTRYHOST/][USERNAME/]NAME[:TAG]
-将镜像docker.io/mysql标记为 127.0.0.1:5000/mysql 镜像
-docker tag docker.io/mysql 127.0.0.1:5000/mysql
-docker rmi
-删除本地一个或多少镜像
-docker rmi -f 127.0.0.1:5000/mysql:v1
-
-
+<p>Docker基础知识
+<p>1. Docker基础知识点
+<p>1.1 什么是Docker
+<p> Docker是一个开源的引擎，可以轻松的为任何应用创建一个轻量级的、可移植的、自给自足的容器。（集装箱原理）
+<p>1.2 什么是LXC
+<p> Linux Container容器是一种内核虚拟化技术，可以提供轻量级的虚拟化，以便隔离进程和资源
+<p> Docker核心解决的问题是利用LXC来实现类似VM的功能，从而利用更加节省的硬件资源提供给用户更多的计算资源。
+<p>2. Docker架构
+<p> Docker 使用客户端-服务器 (C/S) 架构模式，使用远程API来管理和创建Docker容器。
+<p> Docker 容器通过 Docker 镜像来创建。
+<p> 容器与镜像的关系类似于面向对象编程中的对象与类。
+<p>docker	面向对象
+<p>容器	对象
+<p>镜像	类
+<p>注：
+<p>简单的说类是对象的模版。
+<p>首先我们可以来理解一下对象的概念，面向对象编程的程序实际就是多个对象的集合，我们可以把所有的事物都抽象成对象，在程序设计中可以看作：对象=属性+方法。属性就是对象的数据，而方法就是对象的行为。下面来说类，就像我开头所说类是对象的模版，而对象是类的实例化。举个例子，饼干模子可以看作是类，而具体的饼干就是对象。再比如有一个类是表示人，然后可以通过人这个模版来实例化出张三、李四。
+<p>3. Docker名词解释
+<p>Docker 镜像(Images)	Docker 镜像是用于创建 Docker 容器的模板。
+<p>Docker 容器(Container)	容器是独立运行的一个或一组应用。
+<p>Docker架构中服务交付的最终体现形式
+<p>Docker 客户端(Client)	Docker 客户端通过命令行或者其他工具使用 Docker API 与 Docker 的守护进程通信。
+<p>Docker Daemon	Docker Daemon是Docker架构中一个常驻在后台的系统进程，接受并处理Docker Client发送的请求。
+<p>Docker Server
+<p>Docker Server在Docker架构中是专门服务于Docker Client的server，接受并调度分发Docker Client发送的请求。
+<p>Engine
+<p>Engine是Docker架构中的运行引擎，同时也Docker运行的核心模块。它扮演Docker container存储仓库的角色，并且通过执行job的方式来操纵管理这些容器。
+<p>Job
+<p>一个Job可以认为是Docker架构中Engine内部最基本的工作执行单元。Docker可以做的每一项工作，都可以抽象为一个job。
+<p>Docker 仓库(Registry)
+<p> Docker 仓库用来保存镜像，可以理解为代码控制中的代码仓库。而容器镜像是在容器被创建时，被加载用来初始化容器的文件架构与目录。
+<p>Graph
+<p>Graph在Docker架构中扮演已下载容器镜像的保管者，以及已下载容器镜像之间关系的记录者。
+<p>Driver
+<p>Driver是Docker架构中的驱动模块
+<p>graphdriver	主要用于完成容器镜像的管理，包括存储与获取。
+<p>networkdriver	完成Docker容器网络环境的配置
+<p>execdriver	Docker容器的执行驱动，负责创建容器运行命名空间，负责容器资源使用的统计与限制，负责容器内部进程的真正运行等。
+<p>libcontainer
+<p>Docker架构中一个使用Go语言设计实现的库，设计初衷是希望该库可以不依靠任何依赖，直接访问内核中与容器相关的API。容器管理的包
+<p>Docker 主机(Host)	一个物理或者虚拟的机器用于执行 Docker 守护进程和容器。
+<p>4. Docker命令
+<p>4.1 环境信息相关
+<p>docker info  //docker系统信息
+<p>docker version  //docker版本信息
+<p>4.2 系统运维相关
+<p>docker ps
+<p>列出容器
+<p align="left"><p>docker ps [OPTIONS]
+  -a :显示所有的容器，包括未运行的。
+  -f :根据条件过滤显示的内容。
+  -l :显示最近创建的容器。
+  -n :列出最近创建的n个容器。
+  -q :静默模式，只显示容器编号。 
+  docker start/stop/restart
+  docker start :启动一个或多少已经被停止的容器
+  docker stop :停止一个运行中的容器
+  docker restart :重启容器
+  
+  docker pause/unpause
+  docker pause :暂停容器中所有的进程。
+  docker unpause :恢复容器中所有的进程
+  docker pause [OPTIONS] CONTAINER [CONTAINER...]
+  docker unpause [OPTIONS] CONTAINER [CONTAINER...]
+  暂停webapp服务
+  docker pause webapp
+  恢复webapp服务
+  docker unpause webapp
+  docker kill
+  杀掉一个运行中的容器
+  docker kill [OPTIONS] CONTAINER [CONTAINER...]
+  
+ <p> docker exec 
+ <p> 在运行的容器中执行命令
+ <p> docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
+ <p> ocker exec -it ContainerID/ContainaerName
+ <p> 在容器中开启一个交互模式的终端
+ <p> -i :即使没有附加也保持STDIN 打开
+ <p> -t :分配一个伪终端
+  
+  （有时候会在容器外执行下脚本对比在容器内执行脚本，看输出是否一致）
+  docker inspect
+  获取容器/镜像的元数据
+  docker inspect ContainerID/ContainaerName
+  
+  -f :指定返回值的模板文件
+  （多用于获取制定的参数）
+  
+ <p> （通过docker inspect | grep 关键字，也能搜索到，但是没有 -f 指定搜索方便，尤其是当你脚本中要获取某个参数值时）
+ <p> docker top
+ <p> 查看容器中运行的进程信息
+  <p>docker top [OPTIONS] CONTAINER [ps OPTIONS]
+  
+  docker cp
+  用于容器与主机之间的数据拷贝
+  docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-
+  docker cp [OPTIONS] SRC_PATH|- CONTAINER:DEST_PATH
+  docker exec -it
+  <container_id>
+  bash -c 'cat > /path/to/container/file' < /path/to/host/file/
+  
+  
+  docker logs 
+  获取容器的日志
+  -t : 显示时间戳
+  --tail :仅列出最新N条容器日志
+  docker logs -t --tail=10 webapp
+  
+  （有时候产品开发让看下logs，大家都说日志太多了，就可以使用--tail 来获取最新的一部分日志，为了好区分时间，前面可以加上 -t 显示时间）
+  
+  
+  docker search
+  从Docker Hub查找镜像
+  docker search [OPTIONS] TERM
+  
+  docker pull
+  从镜像仓库中拉取或者更新指定镜像
+  docker pull [OPTIONS] NAME[:TAG|@DIGEST]
+  从Docker Hub下载java最新版镜像
+  docker pull java
+  docker push 
+  将本地的镜像上传到镜像仓库,要先登陆到镜像仓库
+  docker push [OPTIONS] NAME[:TAG]
+  docker push webapp:v1
+  docker images
+  列出本地镜像
+  docker images [OPTIONS] [REPOSITORY[:TAG]]
+  -a :列出本地所有的镜像（含中间映像层，默认情况下，过滤掉中间映像层）；
+  -f :显示满足条件的镜像；
+  -q :只显示镜像ID。
+  docker run
+  创建一个新的容器并运行一个命令
+  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+  使用镜像centos:7以交互模式启动一个容器,在容器内执行/bin/bash命令
+ <p> docker run -it centos:7 /bin/bash
+ <p> docker create
+ <p> 创建一个新的容器但不启动它
+ <p> docker create [OPTIONS] IMAGE [COMMAND] [ARG...]
+  <p>使用docker镜像centos:7创建一个容器,并将容器命名为odps
+ <p> docker create  --name odps  centos:7
+ <p> docker rm
+ <p> 删除一个或多少容器
+ <p> docker rm [OPTIONS] CONTAINER [CONTAINER...]
+ <p> docker rm -f webapp
+ <p> docker export
+  <p>将文件系统作为一个tar归档文件导出到STDOUT
+  <p>docker export [OPTIONS] CONTAINER
+</p><p>将id为a404c6c174a2的容器保存为tar文件</p>
+<p>docker export -o mysql.tar a404c6c174a2</p>
+<p>docker save</p>
+<p>将指定镜像保存成 tar 归档文件</p>
+<p>docker save [OPTIONS] IMAGE [IMAGE...]</p>
+<p>将镜像127.0.0.1:5000/java 生成java_v1.tar文档</p>
+<p>docker save -o java_v1.tar 127.0.0.1:5000/java
+<p>docker import
+<p>从归档文件中创建镜像
+<p>docker import [OPTIONS] file|URL|- [REPOSITORY[:TAG]]
+<p>从镜像归档文件mysql.tar创建镜像，命名为127.0.0.1:5000/mysql:v1
+<p> docker import  mysql.tar 127.0.0.1:5000/mysql:v1
+<p>docker tag
+<p>标记本地镜像，将其归入某一仓库
+<p>docker tag [OPTIONS] IMAGE[:TAG] [REGISTRYHOST/][USERNAME/]NAME[:TAG]
+<p>将镜像docker.io/mysql标记为 127.0.0.1:5000/mysql 镜像
+<p>docker tag docker.io/mysql 127.0.0.1:5000/mysql
+<p>docker rmi
+<p>删除本地一个或多少镜像
+<p>docker rmi -f 127.0.0.1:5000/mysql:v1
 </body>
 </html>
