@@ -1,0 +1,276 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	
+	<meta charset="utf-8">
+	<title>  SVN介绍 </title>
+<style type="text/css">
+p {text-indent:24px;}
+</style>
+</head>
+<body>
+	<div style="height:auto;width:800px;">
+   
+<h1>一、概述</h1>
+
+<h2>1、何为svn?</h2>
+<p>Apache Subversion（简称SVN，svn），一个开放源代码的版本控制系统;用来管理文档,程序代码等文档的版本;svn相对git来说有点古老,是一个中心控制的版本控制系统,时至今日仍有不少企业依然使用svn做为代码等文档的管理服务;
+今天我们就来先介绍下在CentOS7下安装部署svn服务与日常使用以及重点介绍svn的两个hooks使用;</p>
+<h2>2、环境介绍</h2>
+<p>Svn server:CentOS7.4_x64 ip:172.16.3.167 subversion 1.97 (最新稳定版);何用yum安装
+关闭selinux 关闭防火墙(生产线上务必添加好防火墙规则)
+测试端win7 下载安装Tortoisesvn客户端请下载与系统版本对应的客户端软件</p>
+
+<h2>3、安装Subversion</h2>
+
+<h3>添加repo源</h3>
+<p>[root@localhost ~]# cat /etc/yum.repos.d/svn.repo </p>
+<p>[WandiscoSVN]</p>
+<p>name=Wandisco SVN Repo</p>
+<p>baseurl=http://opensource.wandisco.com/centos/$releasever/svn-1.9/RPMS/$basearch/</p>
+<p>enabled=1</p>
+<p>gpgcheck=0</p>
+
+<h3>安装</h3>
+<p>[root@localhost ~]# yum install subversion -y</p>
+
+<p>注意 系统自带源中安装的是1.7.x的版本,所以通过此源安装最新的版本;</p>
+<h1>二、svn服务器的配置</h1>
+
+<h2>1、添加到系统服务</h2>
+<p>默认安装完安装包中不提供systemd服务,因此需要自行配置,以下是我的配置</p>
+
+<p>[root@localhost ~]# cat /usr/lib/systemd/system/svnd.service </p>
+<p>[Unit]</p>
+<p>Description=subversion server daemon</p>
+<p>Documentation=man:svn(8) man:svn(5)</p>
+<p>After=network.target</p>
+
+<p>[Service]</p>
+<p>Type=forking</p>
+<p>#User=svn</p>
+<p>#Group=svn </p>
+<p>EnvironmentFile=/etc/sysconfig/svnd      ##相关配置参数所在文件</p>
+<p>ExecStart=/usr/bin/svnserve -d --listen-port $PORT --pid-file $pid_file --log-file $log_file -r $SVN_HOME</p> 
+<p>ExecReload=/bin/kill -HUP $MAINPID </p>
+<p>KillMode=process</p>
+<p>Restart=on-failure</p>
+<p>RestartSec=20s</p>
+
+<p>[Install]</p>
+<p>WantedBy=multi-user.target</p>
+
+<p>[root@localhost ~]# cat /etc/sysconfig/svnd</p>
+<p>##Configure for subversion</p>
+
+<p>pid_file=/var/run/svn.pid</p>
+<p>SVN_HOME=/data1/svn_data/projects      #svn主数据目录</p>
+<p>log_file=/var/log/svnd.log</p>
+<p>PORT=33690                  #自定义端口为33690</p>
+
+<h3># systemed服务重载</h3>
+<p>[root@localhost ~]# systemctl daemon-reload</p>
+
+<p>说明:以上的参数均是通过 svnserve --help 获取配置进去的!</p>
+<h3>创建目录</h3>
+<p>mkdir -pv /data1/svn_data/projects</p>
+
+<h3>启动服务</h3>
+
+<p>[root@localhost ~]# systemctl start svnd</p>
+<p>[root@localhost ~]# systemctl status svnd</p>
+<p>● svnd.service - subversion server daemon</p>
+ <p>  Loaded: loaded (/usr/lib/systemd/system/svnd.service; disabled; vendor preset: disabled)</p>
+ <p>  Active: active (running) since 五 2018-01-26 15:39:22 CST; 30min ago</p>
+  <p>   Docs: man:svn(8)</p>
+ <p> Process: 4347 ExecStart=/usr/bin/svnserve -d --listen-port $PORT --pid-file $pid_file --log-file $log_file -r <p><p>$SVN_HOME (code=exited, status=0/SUCCESS)</p>
+<p> Main PID: 4348 (svnserve)</p>
+ <p>  CGroup: /system.slice/svnd.service</p>
+ <p>          └─4348 /usr/bin/svnserve -d --listen-port 33690 --pid-file /var/run/svn.pid --log-file /var/log/svnd.log -r /data1...
+<p>1月 26 15:39:22 localhost.localdomain systemd[1]: Starting subversion server daemon...</p>
+<p>1月 26 15:39:22 localhost.localdomain systemd[1]: Started subversion server daemon.</p>
+
+<h3>添加开机启动:</h3>
+<p>[root@localhost ~]#  systemctl enable svnd
+
+<h2>2、添加账号</h2>
+<p>由于添加账号和密码比较频繁与繁琐,因此编写脚本处理,参考如下:
+
+<p>#!/bin/bash
+<p>#Author: san
+<p>#version: 1.0
+<p>#date: 2018-01-26
+<p>###########################
+<p>SvnDataDir=/data1/svn_data/projects
+<p>pre_commit_config=${SvnDataDir}/pre-commit
+<p>[ -d ${SvnDataDir}/CodeAuth ] || mkdir -pv ${SvnDataDir}/CodeAuth
+<p>[ -f ${SvnDataDir}/CodeAuth/authz ] || touch ${SvnDataDir}/CodeAuth/authz
+<p>[ -f ${SvnDataDir}/CodeAuth/passwd ] || touch ${SvnDataDir}/CodeAuth/passwd
+
+<p>prog="$1"
+<p>if [ $# -eq 0 ]
+<p>then
+<p>echo  "Have no project's name input,progame exit." && exit 0
+<p>fi
+<p>cd $SvnDataDir
+<p>[ -d $prog ]|| mkdir -p ${SvnDataDir}/$prog
+<p>read -p "Give a paassword:-> " propwd
+<p>#echo $propwd >>propwd.txt
+
+<p>/usr/bin/svnadmin create $SvnDataDir/$prog
+<p>cd $SvnDataDir/$prog/conf
+<p>if [ -f ${SvnDataDir}/CodeAuth/passwd ]
+   <p>then
+    <p>echo "$prog = $propwd" >>${SvnDataDir}/CodeAuth/passwd
+<p>else
+   <p>     echo "[users]" >>${SvnDataDir}/CodeAuth/passwd
+      <p>  echo "$prog = $propwd" >>${SvnDataDir}/CodeAuth/passwd
+<p>fi
+<p> "[$prog:/]" >>${SvnDataDir}/CodeAuth/authz
+<p>echo "$prog = rw" >>${SvnDataDir}/CodeAuth/authz
+
+<p>sed -i 's/^# anon-access = read/anon-access = none/g' svnserve.conf</p>
+<p>sed -i 's/^# auth-access = write/auth-access = write/g' svnserve.conf</p>
+<p>sed -i 's/^# password-db = passwd/password-db = \/data1\/svn_data\/projects\/CodeAuth\/passwd/g' svnserve.conf</p>
+<p>sed -i 's/^# authz-db = authz/authz-db = \/data1\/svn_data\/projects\/CodeAuth\/authz/g' svnserve.conf</p>
+<p>sed -i "s/^# realm = .*./realm = $prog projects /g" svnserve.conf</p>
+
+<p>cp $pre_commit_config ${SvnDataDir}/$1/hooks/ && chmod +x ${SvnDataDir}/$1/hooks/pre-commit</p>
+<p>systemctl restart svnd</p>
+
+<h3>添加可执行权限</h3>
+<p>[root@localhost ~]# chmod +x add.sh</p>
+
+<p>说明:脚本中有一个pre-commit文件,这个文件是svn hooks 钩子之一,用于控制向版本库中提交时的动作;比如很多开发人员提交代码到库中时不填写备注信息,导致后期回滚时或检查时找不到对应的说明,因此可以通过pre-commit钩子来强性让提交代码时填写点信息;这个文件默认是shell可执行文件;也可以是其他语言写的可执行文件;
+以下就是强制提交代码时需要填写信息的钩子,作为默认的模板放在svn数据根目录下~</p>
+
+<p>[root@localhost ~]# cat /data1/svn_data/projects/pre-commit 
+<p>#!/bin/bash
+<p>REPOS="$1"
+<p>TXN="$2"
+<p># Make sure that the log message contains some text.
+<p>SVNLOOK=/usr/bin/svnlook
+<p>#$SVNLOOK log -t "$TXN" "$REPOS" | \
+<p>#   grep "[a-zA-Z0-9]" > /dev/null || exit 1
+<p># Check that the author of this commit has the rights to perform
+<p># the commit on the files and directories being modified.
+<p>#commit-access-control.pl "$REPOS" "$TXN" commit-access-control.cfg || exit 1
+<p>LOGMSG=`$SVNLOOK log -t "$TXN" "$REPOS" | grep "[a-zA-Z0-9]" | wc -c`
+<p>if [ "$LOGMSG" -lt 5 ];#要求注释不能少于5个字符，您可自定义 
+<p>then
+  <p>echo -e "\nLog message cann't be empty! you must input more than 5 chars as comment!." 1>&2
+  <p>exit 1
+<p>fi
+<p># All checks passed, so allow the commit.
+<p>exit 0
+<p>
+此时就可以通过add.sh脚本来添加一个svn库(账号和库同名);如添加san账号也在/data/svn_data/projects/下创建了针对san的svn版本库,示例如下:
+
+<p>[root@localhost projects]# ./add.sh san
+<p>mkdir: 已创建目录 "/data1/svn_data/projects/CodeAuth"
+<p>Give a paassword:-> 123.com
+<p>[root@localhost projects]# ls
+<p>add.sh  CodeAuth  pre-commit  san
+<p>[root@localhost projects]# cat CodeAuth/authz</p> 
+<p>[san:/]
+<p>san = rw
+<p>[root@localhost projects]# cat CodeAuth/passwd 
+<p>[users]
+<p>san = 123.com
+
+到此svn server配置完成;接下看看客户端的使用!
+<h1>三、svn客户端使用</h1>
+
+<h2>1、安装Tortoisesvn</h2>
+下载地址看上面,安装很方便直接下一步到完成!
+
+<h2>2、添加版本库</h2>
+<p>在桌面上新建一个文件夹名字随便取这里叫work
+把work目录作为库目录checkout 如下:
+CentOS7安装配置svn及svn hook实战
+弹出如下:填写版本库地址并输入账号密码
+CentOS7安装配置svn及svn hook实战
+点击OK 如图:表示版本库配置成功!
+CentOS7安装配置svn及svn hook实战</p>
+
+<h2>3、向版本库提交文档</h2>
+在库文件夹中创建1.txt文件添加到库中再提交如图:
+CentOS7安装配置svn及svn hook实战
+CentOS7安装配置svn及svn hook实战
+CentOS7安装配置svn及svn hook实战
+如果不添加备注信息则无法提交成功,出现如下图所示:
+CentOS7安装配置svn及svn hook实战
+以上步聚如果在linux下可以使用命令行处理;
+checkout 目录为版本库目录
+svn co svn://172.16.3.167:33690/san --username san --password 123.com 目录
+如添加文件到版本库
+svn add 1.txt
+提交到库
+svn commit -m "说明信息"
+这里就不多说了!
+<h1>四、svn之post-commit钩子使用</h1>
+
+<h2>1、post-commit钩子说明</h2>
+post-commit钩子默认和pre-commit钩子一样是没有启用的(所有钩子函数默认都没有 启用);但默认都有一个模板;位置在版本库的hooks下;如san账号对应的版本库
+
+[root@localhost hooks]# ls
+post-commit.tmpl  post-revprop-change.tmpl  pre-commit       pre-lock.tmpl            pre-unlock.tmpl
+post-lock.tmpl    post-unlock.tmpl          pre-commit.tmpl  pre-revprop-change.tmpl  start-commit.tmpl
+
+<h2>2、使用post-commit</h2>
+
+<p>通过模板复制成post-commit</p>
+<p>[root@localhost hooks]# cp post-commit.tmpl post-commit</p>
+<p><p>默认内容如下:</p>
+<p>[root@localhost hooks]# egrep -v '(^$|^#)' post-commit
+<p>REPOS="$1"</p>
+<p>REV="$2"</p>
+<p>TXN_NAME="$3"</p>
+<p>mailer.py commit "$REPOS" "$REV" /path/to/mailer.conf
+<p>
+让我们修改下,效果是:当我们使用san账号往san库中提交时,让post-commit给我发一份邮件包含版本号,提交时间,提交内容等信息;</p>
+
+<p>[root@localhost hooks]# cat post-commit</p>
+<p>#!/bin/bash</p>
+<p>export LANG=en_US.UTF-8</p>
+<p>REPOS="$1"</p>
+<p>REV="$2"</p>
+<p>LOGFILE=/data1/svn_data/projects/san/hooks/changedir.log</p>
+<p>exec 1>>"$LOGFILE"</p>
+<p>exec 2>&1</p>
+
+<p>SVNLOOK=/usr/bin/svnlook</p>
+<p>TIME=$(date "+%Y-%m-%d %H:%M:%S")</p>
+<p>#提交作者 </p>
+<p>AUTHOR=$($SVNLOOK author -r $REV "$REPOS")</p>
+<p>#修改的目录集合 </p>
+<p>CHANGEDDIRS=$($SVNLOOK dirs-changed $REPOS)</p>
+<p>#提交时的备注信息，不建议用中文</p>
+<p>MESSAGE=$($SVNLOOK log -r $REV "$REPOS")</p>
+<p>echo "$CHANGEDDIRS" >>/data1/svn_data/projects/san/hooks/changedir.log</p>
+<p>#获取修改子项目目录名</p>
+<p>Rsync_Dir=`echo $CHANGEDDIRS |awk -F / '{print $1}'`</p>
+<p>#echo "$Rsync_Dir at `date`" >/tmp/testdir.log</p>
+<p>function myecho() {</p>
+<p>    echo "$TIME" "$*" </p>
+<p>}</p>
+
+<p>myecho "**************************************************************"</p>
+<p>myecho "提交版本：$REV 作者：$AUTHOR"</p>
+<p>myecho "提交备注：$MESSAGE"</p>
+<p>myecho "修改目录：$(echo $CHANGEDDIRS | tr '\n' ' ')"</p>
+<p>MASTERDIR=$(echo "$CHANGEDDIRS" | head -1)  #CHANGEDDIRS里的主目录
+
+<p>echo "$AUTHOR 代码更新成功,版本:$REV请熟知 时间:`date +%Y-%m-%d-%H:%M:%S`.项目内容:$Rsync_Dir" | mail -s "$AUTHOR 代码更新OK" xxxxxxxx@qq.com     #换成你的邮箱</p>
+
+<p>注意:这里的mail命令如果系统中没有 ,需要yum install mailx -y;
+再对版本库进行提交动作时就会向指定邮箱中发送邮件 ,发送多个邮箱地址需要空格隔开;
+你会发现QQ邮箱默认当作垃圾邮件,因为你没有 备案 不是合法公网ip来源;如果这台主机备案过绑定过域名一般没有 这个问题,这里只测试下逻辑!</p>
+<h3>如图:</h3>
+CentOS7安装配置svn及svn hook实战
+<h3>总结:</h3>
+
+<p>我们通过svn管理版本,可以实现提交,回溯版本的功能,通过svn hooks可以完成提交前的处理,和提交后的处理工作;这里只是抛砖引玉,一般中小企业可以使用,比如提交后结合 rsync把更新的内容推到前端服务器上;但需要注意rsync时排除一些配置文件;网页形式的svn构建请看这里http://blog.51cto.com/dyc2005/1942131</p>
+	</div>
+</body>
+</html>
