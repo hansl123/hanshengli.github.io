@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>ansible模块使用</title>
+<style type="text/css">
+p {text-indent:24px;line-height:20px;}
+</style>
+</head>
+
+<body style="background-size:100% 100%;background-image:url('http://www.aspire-tech.com/Public/home/images/zw_51.png');background-attachment: fixed;background-repeat:no-repeat;">
+	<div style="width:1000px;height:auto;margin-left:300px;">
+        <h1 style="margin-left:300px;padding:30px 0px 50px 0px;">Ansible常用模块</h1>
+         	<h2>[ansible]</h2>
+
+    			<p>这里主要记录一下常规的ansible命令</p>
+                
+                <p>ansible的安装可以使用命令：yum install ansible -y</p>
+   
+                <p>ansible的配置文件：</p>
+                
+                <p>这里默认使用了all作为ansible命令的组，实际使用中，可以自己根据实际需求在文件/etc/ansible/host中添加主机组。
+                这里要注意的是被控制的主机需要添加ansible服务器的公钥，确保ssh能够没有密码就能够访问被控制的主机。</p>
+ 
+                <p>要使ansible的服务无密码访问被控制的主机还需将ansible主机的公钥加到被控制主机的authorized_key中。</p>
+ 
+            <h2>ansible命令通常由以下格式组成：</h2>
+                
+                <p>ansible &ltansible.client&gt -m &ltmodule&gt -a &ltargs&gt </p>
+                
+                <p>其中&ltansible.client&gt可以是配置文件中的服务器组名，ip，域名等一切能表达主机的名称。 </p>
+
+                <p>&ltargs&gt </p>
+                
+                <p>[-k]                     //每次都要询问密码</p>
+                
+                <p>[-u &ltusername&gt] [--sudo] //以&ltusername&gt的身份运行，再加--sudo获取root权限 </p>
+
+                <p>-m的&ltmodule&gt:</p>
+ 
+                <h2>command:</h2>
+                
+                <p>ansible &ltansible.client&gt -m command -a "&ltcommand&gt" </p>
+                
+                <p>//远程发送命令
+                <p><img src="use/1.png" height="100px" width="700px" alt="command" /></p>
+
+                <h2>copy:</h2>
+                
+                <p>ansible &ltansible.client&gt -m copy -a "src=&lt/path/to/localfile&gt dest=&lt/path/to/remotefile&gt" </p>
+                
+                <p>//远程传文件
+                <p><img src="use/2.png" height="300px" width="700px" alt="copy" /></p>
+
+               <h2> file:</h2>
+                
+                <p>ansible &ltansible.client&gt -m file -a "dest=&lt/path/to/remotefile&gt mode=&ltchmod.mun&gt [owner=&ltusername&gt] [group=&ltgroup&gt]" </p>
+                
+                <p>//远程创建文件，可以设置文件的权限与用户名
+                
+                <p>//第一次生成文件要state=touch
+                <p><img src="use/3.png" height="250px" width="700px" alt="file" /></p>
+                
+                
+                
+                <p>ansible &ltansible.client&gt -m file -a "dest=&lt/path/to/remotedir&gt mode=&ltchmod.num&gt state=directory" </p>
+                
+                <p>//远程创建文件夹
+                
+                <p><img src="use/4.png" height="250px" width="700px" alt="file" /></p>
+                
+                <p>ansible &ltansible.client&gt -m file -a "dest=&lt/path/to/remotefile&gt state=absent" </p>
+                
+                <p>//远程删除文件
+                <p><img src="use/5.png" height="130px" width="700px" alt="file" /></p>
+
+                <h2>ping:</h2>
+                
+                <p>ansible &ltansible.client&gt -m ping</>
+                
+                <p>//ping所有&ltansible.client&gt的主机，查看ansible服务器和被控制主机的网络是否通。
+                <p><img src="use/6.png" height="100px" width="700px" alt="ping" /></p>
+   
+                <h2>service</h2>
+                
+                <p>ansible &ltansible.client&gt -m service -a "name=&ltservice.name&gt state={started|restarted|stoped}"</p>
+                
+                <p>//修改服务的状态</p>
+                <p><img src="use/7.png" height="200px" width="700px" alt="ping" /></p>
+                <p><img src="use/8.png" height="200px" width="700px" alt="ping" /></p>
+
+                <h2>shell:</h2>
+                
+                <p>ansible &ltansible.client&gt -m shell -a '&ltcommand&gt' </p>
+                
+                <p>//向远程主机发送命令
+                <p><img src="use/9.png" height="200px" width="700px" alt="ping" /></p>
+
+                <h2>user:</h2>
+                
+                <p>ansible &ltansible.client&gt -m user -a "name=&ltusername&gt [passwd=&ltcrypted.passwd&gt]" </p>
+                
+                <p>//添加一个用户
+                <p><img src="use/11.png" height="300px" width="700px" alt="user" /></p>
+                
+                <p>根据实际情况，密码这个项最好是先在一台主机上建一个密码，然后在/etc/shadow里提取。而且某些系统中密码是包含特殊字符$，所以密码要用单引号扩起来而$前要用\符号转译。 </p>
+
+                <h2>yum:</h2>
+                
+                <p>ansible &ltansible.client&gt -m yum -a "name=&ltsoftware.name&gt state=present" </p>
+                
+                <p>//直接安装指定软件，如果已安装则查看版本信息。</p>
+                <p><img src="8.png" height="200px" width="700px" alt="yum" /></p>
+        <p style="padding:20px 0px 30px 500px;"><a href="djdbs.html" >......</a></p>
+	</div>
+</body>
+</html>
