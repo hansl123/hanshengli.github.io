@@ -13,44 +13,70 @@ p {text-indent:24px;line-height:20px;}
         <h1 style="margin-left:300px;padding:30px 0px 50px 0px;">Ansible常用模块</h1>
          	<h2>[ansible]</h2>
 
-    			<p>这里主要记录一下常规的ansible命令</p>
-                
-                <p>ansible的安装可以使用命令：yum install ansible -y</p>
-   
-                <p>ansible的配置文件：</p>
-                
-                <p>这里默认使用了all作为ansible命令的组，实际使用中，可以自己根据实际需求在文件/etc/ansible/host中添加主机组。
-                这里要注意的是被控制的主机需要添加ansible服务器的公钥，确保ssh能够没有密码就能够访问被控制的主机。</p>
- 
-                <p>要使ansible的服务无密码访问被控制的主机还需将ansible主机的公钥加到被控制主机的authorized_key中。</p>
+                    <p>这里主要记录一下常规的ansible命令</p>
+                    
+                    <p>ansible的安装可以使用命令：yum install ansible -y</p>
+       
+                    <p>ansible的配置文件：</p>
+                    
+                    <p>这里默认使用了all作为ansible命令的组，实际使用中，可以自己根据实际需求在文件/etc/ansible/host中添加主机组。
+                    这里要注意的是被控制的主机需要添加ansible服务器的公钥，确保ssh能够没有密码就能够访问被控制的主机。</p>
+     
+                    <p>要使ansible的服务无密码访问被控制的主机还需将ansible主机的公钥加到被控制主机的authorized_key中。</p>
+                    <p>ansible模块有很多，具体模块的使用方法可以使用 ansible-doc 命令可以详细的查看</p>
+                    <p>例如：[root@server1 ~]# ansible-doc service  # 查看模块 service 的使用方法</p>
  
             <h2>ansible命令通常由以下格式组成：</h2>
                 
-                <p>ansible &ltansible.client&gt -m &ltmodule&gt -a &ltargs&gt </p>
-                
-                <p>其中&ltansible.client&gt可以是配置文件中的服务器组名，ip，域名等一切能表达主机的名称。 </p>
-
-                <p>&ltargs&gt </p>
-                
-                <p>[-k]                     //每次都要询问密码</p>
-                
-                <p>[-u &ltusername&gt] [--sudo] //以&ltusername&gt的身份运行，再加--sudo获取root权限 </p>
-
-                <p>-m的&ltmodule&gt:</p>
+                    <p>ansible &ltansible.client&gt -m &ltmodule&gt -a &ltargs&gt </p>
+                    
+                    <p>其中&ltansible.client&gt可以是配置文件中的服务器组名，ip，域名等一切能表达主机的名称。 </p>
+    
+                    <p>&ltargs&gt </p>
+                    
+                    <p>[-k]                     //每次都要询问密码</p>
+                    
+                    <p>[-u &ltusername&gt] [--sudo] //以&ltusername&gt的身份运行，再加--sudo获取root权限 </p>
+    
+                    <p>-m的&ltmodule&gt:</p>
  
                 <h2>command:</h2>
                 
-                <p>ansible &ltansible.client&gt -m command -a "&ltcommand&gt" </p>
-                
-                <p>//远程发送命令
-                <p><img src="use/1.png" height="100px" width="700px" alt="command" /></p>
-
+                    <p>ansible &ltansible.client&gt -m command -a "&ltcommand&gt" </p>
+                    
+                    <p>//远程发送命令
+                    <p><img src="use/1.png" height="100px" width="700px" alt="command" /></p>
+                    
+                <h2>template</h2>
+                	<p>ansible &ltansible.client&gt -m template -a "src=&lt/path/to/localfile&gt dest=&lt/path/to/remotefile&gt"</p>
+                    <p>backup： 如果原目标文件存在，则先备份目标文件</p> 
+                    <p>src：在ansible控制器上的Jinja2格式化模板的路径。 这可以是相对或绝对的路径。</p> 
+                    <p>dest：将模板渲染到远程机器上的位置。</p>
+                    <p>owner：目标文件属主</p> 
+					<p>group：目标文件属组 </p>
+                    <p>force:是否强制覆盖yes</p>
+                    <p>mode:目标文件的权限模式，模式可以被指定为符号模式（例如，u + rwx或u = rw，g = r，o = r）。</p>
+					<p><img src="use/16.png" height="300px" width="700px" alt="copy" /></p>
                 <h2>copy:</h2>
+                    <p>src：要复制到远程主机的文件在本地的地址，可以是绝对路径，也可以是相对路径。如果路径是一个目录，它将递归复制。在这种情况下，如果路径使用”/”来结尾，则只复制目录里的内容，如果没有使用”/”来结尾，则包含目录在内的整个内容全部复制，类似于rsync。</p> 
+                    <p>content：用于替代”src”,可以直接设定指定文件的值 </p>
+                    <p>dest：必选项。要将源文件复制到的远程主机的绝对路径，如果源文件是一个目录，那么该路径也必须是个目录</p> 
+                    <p>directory_mode：递归的设定目录的权限，默认为系统默认权限 </p>
+                    <p>force：如果目标主机包含该文件，但内容不同，如果设置为yes，则强制覆盖，如果为no，则只有当目标主机的目标位置不存在该文件时，才复制。默认为yes</p> 
                 
-                <p>ansible &ltansible.client&gt -m copy -a "src=&lt/path/to/localfile&gt dest=&lt/path/to/remotefile&gt" </p>
+                	<p>ansible &ltansible.client&gt -m copy -a "src=&lt/path/to/localfile&gt dest=&lt/path/to/remotefile&gt" </p>
                 
                 <p>//远程传文件
-                <p><img src="use/2.png" height="300px" width="700px" alt="copy" /></p>
+                	<p><img src="use/2.png" height="300px" width="700px" alt="copy" /></p>
+                
+                <h2>fetch</h2>
+                    <p>ansible &ltansible.client&gt -m fetch -a "src=&lt/path/to/localfile&gt dest=&lt/path/to/remotefile&gt" </p>
+                    <p>//远程文件复制到本地</p>
+                    <p><img src="use/14.png" height="200px" width="700px" alt="copy" /></p>
+                
+                <h2>replace</h2>
+                    <p>ansible &ltansible.client&gt -m replace -a "dest=&lt/path/to/remotefile&gt regexp='Old' replace='New' backeup=yes"</p>
+                    <p><img src="use/15.png" height="150px" width="700px" alt="copy" /></p>
 
                <h2> file:</h2>
                 
@@ -97,15 +123,36 @@ p {text-indent:24px;line-height:20px;}
                 <p><img src="use/9.png" height="200px" width="700px" alt="ping" /></p>
 
                 <h2>user:</h2>
-                
-                <p>ansible &ltansible.client&gt -m user -a "name=&ltusername&gt [passwd=&ltcrypted.passwd&gt]" </p>
-                
-                <p>//添加一个用户</p>
-                <p style="color:red"><strong>此处的密码创建无效，详情请查看<a href="passwd.html" >ansible用户创建及密码</a></strong></p>
-                <p><img src="use/11.png" height="300px" width="700px" alt="user" /></p>
-                
-                <p>根据实际情况，密码这个项最好是先在一台主机上建一个密码，然后在/etc/shadow里提取。而且某些系统中密码是包含特殊字符$，所以密码要用单引号扩起来而$前要用\符号转译。 </p>
+                	<p>home：指定用户的家目录，需要与createhome配合使用。</p> 
+                    <p>groups：指定用户的属组。 </p>
+                    <p>uid：指定用的uid。 </p>
+                    <p>password：指定用户的密码。</p>  
+                    <p>name：指定用户名。 </p>
+                    <p>createhome：是否创建家目录 yes|no。</p> 
+                    <p>system：是否为系统用户。 </p>
+                    <p>remove：当state=absent时，remove=yes则表示连同家目录一起删除，等价于userdel -r。</p> 
+                    <p>state：是创建还是删除。（present，absent） </p>
+                    <p>shell：指定用户的shell环境。 </p>
+                    <p>generate_ssh_key：是否为相关用户生成SSH密钥。 这不会覆盖现有的SSH密钥。</p> 
+                    <p>ssh_key_bits：可选择指定要创建的SSH密钥中的位数。 </p>
+                    <p>ssh_key_passphrase：设置SSH密钥的密码。 如果没有提供密码，SSH密钥将默认没有密码。</p> 
+                    <p>ssh_key_file：指定SSH密钥文件名（可选）。 如果这是一个相对的文件名，那么它将是相对于用户的主目录。</p> 
+                    <p>ssh_key_type：指定要生成的SSH密钥的类型（可选）。 可用的SSH密钥类型将取决于目标主机上的实现。</p>
 
+                
+                    <p>ansible &ltansible.client&gt -m user -a "name=&ltusername&gt [passwd=&ltcrypted.passwd&gt]" </p>
+                    
+                    <p>//添加一个用户</p>
+                    <p style="color:red"><strong>此处的密码创建无效，详情请查看<a href="passwd.html" >ansible用户创建及密码</a></strong></p>
+                    <p><img src="use/11.png" height="300px" width="700px" alt="user" /></p>
+                    
+                    <p>根据实际情况，密码这个项最好是先在一台主机上建一个密码，然后在/etc/shadow里提取。而且某些系统中密码是包含特殊字符$，所以密码要用单												                       引号扩起来而$前要用\符号转译。 </p>
+                <h2>group模块</h2>
+                    <p>gid：指定用的gid。</p> 
+                    <p>name：指定用户名。</p> 
+                    <p>state：是创建还是删除。（present，absent）</p> 
+                    <p>system：如果是，则表示创建的组是系统组。</p>
+					<p><img src="use/17.png" height="150px" width="700px" alt="user" /></p>
                 <h2>yum:</h2>
                 
                 <p>ansible &ltansible.client&gt -m yum -a "name=&ltsoftware.name&gt state=present" </p>
