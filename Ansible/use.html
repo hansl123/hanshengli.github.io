@@ -223,8 +223,16 @@ p {text-indent:24px;line-height:20px;}
                     <p>mode：解压后文件的权限 </p>
                     <p>src：如果copy为yes，则需要指定压缩文件的源路径 </p>
                     <p>owner：解压后文件或目录的属主</p>
-                  
-                
+                <h2>unarchive模块</h2>
+                    <p>setup模块，主要用于获取主机信息，在playbooks里经常会用到的一个参数gather_facts就与该模块相关。</p>
+                    <p>setup模块下经常使用的一个参数是filter参数，具体使用示例如下（由于输出结果较多，这里只列命令不写结果）：</p>
+                    <p>//查看主机内存</p>
+                    <p>[root@361way ~]# ansible 10.212.52.252 -m setup -a 'filter=ansible_*_mb'  </p>
+                    <p>//查看地接口为eth0-2的网卡信息</p>
+                    <p>[root@361way ~]# ansible 10.212.52.252 -m setup -a 'filter=ansible_eth[0-2]'   </p>
+                    <p>//将所有主机的信息输入到/tmp/facts目录下，每台主机的信息输入到主机名文件中（/etc/ansible/hosts里的主机名）</p>
+                    <p>[root@361way ~]# ansible all -m setup --tree /tmp/facts   </p>
+                                    
         			<p style="padding:20px 0px 30px 500px;"><a href="djdbs.html" >后面更精彩</a></p>
 	</div>
 </body>
